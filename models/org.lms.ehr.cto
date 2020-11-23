@@ -1,0 +1,230 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Write your model definitions here
+ */
+
+namespace org.lms.ehr
+
+participant Patient identified by patientId {
+  o String patientId
+  o String firstName
+  o String lastName
+  o Gender gender
+  o Double date_of_birth
+  o String registrationNumber
+  o String job optional
+  o String Adresse optional
+
+}
+participant agent identified by agentId {
+  o String agentId
+  o String firstName
+  o String lastName
+}
+
+
+
+participant Doctor identified by doctorrId {
+  o String doctorrId
+  o String firstName
+  o String lastName
+  o Gender gender
+  o String Email
+  o String department
+  o String specialization
+  o String registrationNumber optional
+  o String Specialisation optional
+  o String Adresse optional 
+}
+
+participant Pharma identified by pharmaId {
+  o String pharmaId
+  o String firstName
+  o String lastName
+  o Gender gender
+  o String department
+  o String email
+
+}
+
+participant Nurse identified by nurseId {
+  o String nurseId
+  o String firstName
+  o String lastName
+  o Gender gender
+  o String email
+  o String department
+  o String specialization
+}
+
+
+
+asset  Drug identified by drugId {
+  o String drugId
+  o String drugname 
+  o String price
+  o String description
+  o String manufacturer
+  o DateTime expireydate
+  o DateTime manufacturedate
+  o String quantite_ml
+  o String quantity_g
+ }
+
+
+
+
+
+
+
+asset Prescription identified by recordId {
+  o String recordId
+  o DateTime time optional
+  o String description 
+  o String comments
+  --> Drug drug
+  --> Pharma pharma
+  --> Doctor doctor
+  --> Patient patient 
+  --> Nurse nurse
+  --> MedicalRecords meds
+}
+
+
+transaction CreatePrescription{
+  o String recordId
+  o DateTime time optional
+  o String comments 
+  o String description
+  --> Drug drug
+  --> Nurse nurse
+  --> Pharma pharma
+  --> Doctor doctor
+  --> Patient patient 
+  -->  MedicalRecords meds
+}
+
+asset appointment identified by appId {
+  o String appId
+  --> Doctor doctor
+  --> Patient patient 
+  -->  MedicalRecords meds
+  o String datefield 
+}
+
+transaction take_appointment {
+  o String appId
+  --> Doctor doctor
+  --> Patient patient
+  -->  MedicalRecords meds
+  o String datefield 
+}
+
+
+
+asset Order identified by orderId {
+  o String orderId
+  o orderstatus status 
+  -->Prescription prescription
+  -->Pharma pharma
+  -->Nurse nurse
+ 
+}
+enum orderstatus {
+  o waiting
+  o placed
+  o confirmed
+}
+enum Gender {
+  o Male
+  o Female
+}
+
+transaction createorder {
+  o String  orderId
+  -->Prescription prescription 
+  -->Pharma pharma
+  -->Nurse nurse
+}
+transaction updateorderstatus {
+  o orderstatus status
+  -->Order order
+  
+}
+
+transaction _demoSetup {
+}
+
+
+@commit(false)
+@returns(String)
+transaction getUserType {
+  o String email
+}
+
+
+/// new code
+
+
+
+asset MedicalRecords identified by record_id{
+	  o String record_id
+    o String patientId
+    o String patient_First_Name
+    o String patient_Last_Name
+    o String description
+    o Double high
+    o Double weight
+    o String Allergies optional
+    o Boolean smoking optional
+    o String[] authorized optional
+    o Prescription[] prescription optional
+  	o appointment[] app optional
+  -->Patient patient
+}
+
+
+
+transaction AddnewMedicalRecord{
+    o String patientId
+    o String patient_First_Name
+    o String patient_Last_Name
+    o String description
+    o Double high
+    o Double weight
+    o String Allergies optional
+    o Boolean smoking optional
+    o Doctor[] authorized optional
+    o Prescription[] prescription optional
+   	o appointment[] app optional
+  -->Patient patient
+}
+
+abstract transaction MedicalRecordTransaction{
+  --> MedicalRecords medicalRecord
+}
+
+
+
+transaction AllowOthersToRead extends MedicalRecordTransaction{
+   o String UserId
+}
+
+
+transaction RemoveOthersToRead extends MedicalRecordTransaction{
+  o String UserId
+}
+

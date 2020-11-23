@@ -1,0 +1,273 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+rule NetworkUpdate {
+  description:  "System ACL to permit all access"
+  participant: "org.lms.ehr.Patient"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.Network"
+  action: ALLOW
+}
+
+rule SystemACL {
+  description:  "System ACL to permit all access"
+  participant: "org.hyperledger.composer.system.Participant"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.**"
+  action: ALLOW
+}
+
+rule NetworkAdminUser {
+    description: "Grant business network administrators full access to user resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "**"
+    action: ALLOW
+}
+
+
+rule NetworkAdminSystem {
+    description: "Grant business network administrators full access to system resources"
+    participant: "org.hyperledger.composer.system.NetworkAdmin"
+    operation: ALL
+    resource: "org.hyperledger.composer.system.**"
+    action: ALLOW
+}
+//patient
+rule DoctorSeeThemselves {
+  description: "Patient can see their own participant"
+  participant(t): "org.lms.ehr.Doctor"
+  operation: ALL
+  resource(v): "org.lms.ehr.Doctor"
+  condition: (v.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+rule DoctorSeeNurse {
+  description: "Patient can see their own participant"
+  participant: "org.lms.ehr.Doctor"
+  operation: ALL
+  resource: "org.lms.ehr.Nurse"
+  
+  action: ALLOW
+}
+rule PharmaSeeNurse {
+  description: "Patient can see their own participant"
+  participant: "org.lms.ehr.Pharma"
+  operation: ALL
+  resource: "org.lms.ehr.Nurse"
+  
+  action: ALLOW
+}
+
+rule DoctorSeePharma {
+  description: "Patient can see their own participant"
+  participant: "org.lms.ehr.Doctor"
+  operation: ALL
+  resource: "org.lms.ehr.Pharma"
+  
+  action: ALLOW
+}
+rule NurseSeePharma {
+  description: "Patient can see their own participant"
+  participant: "org.lms.ehr.Nurse"
+  operation: ALL
+  resource: "org.lms.ehr.Pharma"
+  
+  action: ALLOW
+}
+
+rule nurseSeeThemselves {
+  description: "Patient can see their own participant"
+  participant(t): "org.lms.ehr.Nurse"
+  operation: ALL
+  resource(v): "org.lms.ehr.Nurse"
+  condition: (v.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+rule pharmaSeeThemselves {
+  description: "Patient can see their own participant"
+  participant(t): "org.lms.ehr.Pharma"
+  operation: ALL
+  resource(v): "org.lms.ehr.Pharma"
+  condition: (v.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+rule DoctorSeePAtient {
+  description: "Doctor see patient"
+  participant(t): "org.lms.ehr.Doctor"
+  operation: ALL
+  resource: "org.lms.ehr.Patient"
+  condition: (testOwnership("org.lms.ehr.MedicalRecords", t))
+  action: ALLOW
+}
+rule patientSeeThemselves {
+  description: "Patient can see their own participant"
+  participant(t): "org.lms.ehr.Patient"
+  operation: ALL
+  resource(v): "org.lms.ehr.Patient"
+  condition: (v.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+rule appointment_doctor{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant(t): "org.lms.ehr.Doctor"
+  operation: ALL
+  resource(v): "org.lms.ehr.appointment"
+  condition: (v.doctor.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+rule appointment_patient{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant(t): "org.lms.ehr.Patient"
+  operation: READ
+  resource(v): "org.lms.ehr.appointment"
+  condition: (v.patient.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+
+rule Patientaccesmedicalrecords {
+	description: "patient can see only his medical record"
+  	participant(t): "org.lms.ehr.Patient"
+  	operation:ALL
+    resource(v):"org.lms.ehr.MedicalRecords"
+	condition: (v.patientId == t.getIdentifier())
+    action: ALLOW 
+}
+rule Docaccesmedicalrecords {
+	description: "patient can see only his medical record"
+  	participant(t): "org.lms.ehr.Doctor"
+  	operation:ALL
+    resource(v):"org.lms.ehr.MedicalRecords"
+	condition: (v.authorized == t.getIdentifier())
+    action: ALLOW 
+}
+
+
+
+rule perscreption_doctor{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant(t): "org.lms.ehr.Doctor"
+  operation: ALL
+  resource(v): "org.lms.ehr.Prescription"
+  condition: (v.doctor.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+rule perscreption_nurse{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant(t): "org.lms.ehr.Nurse"
+  operation: ALL
+  resource(v): "org.lms.ehr.Prescription"
+  condition: (v.nurse.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+rule perscreption_patient{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant(t): "org.lms.ehr.Patient"
+  operation: READ
+  resource(v): "org.lms.ehr.Prescription"
+  condition: (v.patient.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+
+rule perscreption_pharma{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant(t): "org.lms.ehr.Pharma"
+  operation: READ
+  resource(v): "org.lms.ehr.Prescription"
+  condition: (v. pharma.getIdentifier() == t.getIdentifier())
+  action: ALLOW
+}
+
+
+
+rule patient_give_acces_to_medical_record{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Patient"
+  operation: ALL
+  resource: "org.lms.ehr.AllowOthersToRead"
+  action: ALLOW
+}  
+rule patient_remove_acces_to_medical_record{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Patient"
+  operation: ALL
+  resource: "org.lms.ehr.RemoveOthersToRead"
+  action: ALLOW
+} 
+rule doc_cretate_prescreption{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Doctor"
+  operation: ALL
+  resource: "org.lms.ehr.CreatePrescription"
+  action: ALLOW
+}
+
+
+rule doc_give_appointment{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Doctor"
+  operation: ALL
+  resource: "org.lms.ehr.take_appointment"
+  action: ALLOW
+}
+
+rule create_order{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Pharma"
+  operation: ALL
+  resource: "org.lms.ehr.createorder"
+  action: ALLOW
+}
+rule update_order{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Pharma"
+  operation: ALL
+  resource: "org.lms.ehr.updateorderstatus"
+  action: ALLOW
+}
+rule pharma_see_order{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Pharma"
+  operation: ALL
+  resource: "org.lms.ehr.Order"
+  action: ALLOW
+}
+rule pharma_see_drug{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Pharma"
+  operation: ALL
+  resource: "org.lms.ehr.Drug"
+  action: ALLOW
+}
+
+rule doc_see_drug{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Doctor"
+  operation: READ
+  resource: "org.lms.ehr.Drug"
+  action: ALLOW
+}
+rule Nurse_see_order{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Nurse"
+  operation: ALL
+  resource: "org.lms.ehr.Order"
+  action: ALLOW
+}
+rule Nurse_see_doc{
+  description: "Collectors should be able to see the history of the own transactions"
+  participant: "org.lms.ehr.Nurse"
+  operation: ALL
+  resource: "org.lms.ehr.Doctor"
+  action: ALLOW
+}
